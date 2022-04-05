@@ -11,6 +11,10 @@ yarn add typescript --dev
 yarn add jest @types/jest --dev
 yarn add --dev babel-jest @babel/core @babel/preset-env
 yarn add --dev @babel/preset-typescript
+// husky
+npm install husky --save-dev
+npx husky install
+npx husky add .husky/commit-msg
 ```
 
 > tsconfig.json
@@ -39,3 +43,8 @@ module.exports = {
 };
 ```
 
+> .husky/commit-msg
+
+```js
+undefined => node scripts/verifyCommit.js
+```
