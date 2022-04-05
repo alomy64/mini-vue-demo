@@ -43,5 +43,7 @@ export function effect(fn, options: any = {}) {
   const _effect = new ReactiveEffect(fn, options.scheduler);
   _effect.run();
 
-  return _effect.run.bind(_effect);
+  const runner = _effect.run.bind(_effect);
+
+  return runner;
 }
