@@ -4,3 +4,8 @@ export const extend = Object.assign;
 export const isObject = (val) => {
   return val !== null && typeof val === "object";
 };
+
+// 值有没有改变
+export const hasChanged = (val, newValue) => {
+  return !Object.is(val, newValue);
+};
