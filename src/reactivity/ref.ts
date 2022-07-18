@@ -3,8 +3,9 @@ import { hasChanged, isObject } from "../shared";
 import { reactive } from "./reactive";
 
 class RefImpl {
-  private _value: any;
   public dep;
+  public __v_isRef = true;
+  private _value: any;
   private _rawValue: any;
   constructor(value) {
     this._rawValue = value; // 保留普通 object, 以便 set value 时对比
@@ -41,4 +42,14 @@ function trackRefValue(ref) {
 
 export function ref(value) {
   return new RefImpl(value);
+}
+
+// 是否为 ref => Boolean
+export function isRef(ref) {
+  return !!ref.__v_isRef;
+}
+
+// unRef 判断是否为 ref, 是 => ref.value 否 => ref
+export function unRef(ref) {
+  return isRef(ref) ? ref.value : ref;
 }
