@@ -53,3 +53,23 @@ export function isRef(ref) {
 export function unRef(ref) {
   return isRef(ref) ? ref.value : ref;
 }
+
+// proxyRefs
+export function proxyRefs(objectWithRefs) {
+  return new Proxy(objectWithRefs, {
+    // get: ref => .value, not ref => value
+    get(target, key) {
+      return unRef(Reflect.get(target, key));
+    },
+    // set
+    set(target, key, value) {
+      if (isRef(target[key]) && !isRef(value)) {
+        // not ref(value) => 赋值
+        return (target[key].value = value);
+      } else {
+        // ref(value) => 替换
+        return Reflect.set(target, key, value);
+      }
+    },
+  });
+}
