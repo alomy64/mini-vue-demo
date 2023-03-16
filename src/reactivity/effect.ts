@@ -4,8 +4,9 @@ class EffectReactive {
   /**
    * constructor
    * @param fn 要 收集/执行 的函数
+   * @param scheduler 可选参数，public，使外部可以访问到 scheduler
    */
-  constructor(fn) {
+  constructor(fn, public scheduler?) {
     this._fn = fn;
   }
 
@@ -24,10 +25,12 @@ let activeEffect;
 /**
  * effect
  * @param fn 需要被依赖收集的函数
+ * @param options 可传 scheduler
+ * @returns effect 执行 run 方法之后返回的 fn
  */
-export function effect(fn) {
-  // 根据传入的 fn 创建 EffectReactive 实例
-  const _effect = new EffectReactive(fn);
+export function effect(fn, options: any = {}) {
+  // 根据传入的 fn 和 scheduler 创建 EffectReactive 实例
+  const _effect = new EffectReactive(fn, options.scheduler);
 
   // 执行effect
   _effect.run();
@@ -82,7 +85,15 @@ export function trigger(target, key) {
   const dep = depsMap.get(key);
   // 循环 dep
   for (const effect of dep) {
-    // 调用执行每个 effect
-    effect.run();
+    /**
+     * 调用执行每个 effect
+     * 如果有 scheduler，就执行 scheduler
+     * 否则，执行 run 方法
+     */
+    if (effect.scheduler) {
+      effect.scheduler();
+    } else {
+      effect.run();
+    }
   }
 }
