@@ -13,8 +13,8 @@ class EffectReactive {
   run() {
     // activeEffect 绑定
     activeEffect = this;
-    // 执行 fn
-    this._fn();
+    // 返回并执行 fn
+    return this._fn();
   }
 }
 
@@ -31,6 +31,9 @@ export function effect(fn) {
 
   // 执行effect
   _effect.run();
+
+  // 以当前的实例作为 this 的指向
+  return _effect.run.bind(_effect);
 }
 
 // 保存所有 target 的 Map

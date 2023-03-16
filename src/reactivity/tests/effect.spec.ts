@@ -17,4 +17,18 @@ describe("effect", () => {
     userReactive.age++;
     expect(userAge).toBe(3);
   });
+  it("调用 effect 返回 runner", () => {
+    let count = 10;
+    const runner = effect(() => {
+      count++;
+      return "Hello";
+    });
+
+    expect(count).toBe(11);
+
+    const r = runner();
+
+    expect(count).toBe(12);
+    expect(r).toBe("Hello");
+  });
 });
