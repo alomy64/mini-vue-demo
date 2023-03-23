@@ -78,4 +78,20 @@ describe("effect", () => {
     runner();
     expect(userAge).toBe(3);
   });
+  it("onStop", () => {
+    let userReactive = reactive({ age: 1 });
+    let userAge;
+    const onStop = jest.fn();
+
+    const runner = effect(
+      () => {
+        userAge = userReactive.age;
+      },
+      { onStop }
+    );
+
+    // 调用 stop 之后，会执行一次 onStop
+    stop(runner);
+    expect(onStop).toBeCalledTimes(1);
+  });
 });

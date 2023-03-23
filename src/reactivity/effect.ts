@@ -1,9 +1,13 @@
+import { extend } from "../shared/index";
+
 class EffectReactive {
   private _fn: any;
   // 收集此 effect 对应的所有 dep
   deps = [];
   // 状态，防止多次调用 stop 方法时多次清空
   active = true;
+  // onStop 有值的话，则在 stop 方法执行之后调用
+  onStop?: () => void;
 
   /**
    * constructor
@@ -27,6 +31,11 @@ class EffectReactive {
     if (this.active) {
       // 传入此 effect，调用 cleanupEffect 进行清除
       cleanupEffect(this);
+      // 有 onStop 的情况
+      if (this.onStop) {
+        // 则会执行 onStop 方法
+        this.onStop();
+      }
       // 设置状态为 false，以防多次调用时多次清空
       this.active = false;
     }
@@ -57,6 +66,9 @@ let activeEffect;
 export function effect(fn, options: any = {}) {
   // 根据传入的 fn 和 scheduler 创建 EffectReactive 实例
   const _effect = new EffectReactive(fn, options.scheduler);
+
+  // 将 options 合并入 effect
+  extend(_effect, options);
 
   // 执行effect
   _effect.run();
