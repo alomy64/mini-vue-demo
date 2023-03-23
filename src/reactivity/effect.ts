@@ -1,5 +1,9 @@
 class EffectReactive {
   private _fn: any;
+  // 收集此 effect 对应的所有 dep
+  deps = [];
+  // 状态，防止多次调用 stop 方法时多次清空
+  active = true;
 
   /**
    * constructor
@@ -17,6 +21,28 @@ class EffectReactive {
     // 返回并执行 fn
     return this._fn();
   }
+
+  stop() {
+    // active 为 true 时，清空 effect 并更改 active 状态
+    if (this.active) {
+      // 传入此 effect，调用 cleanupEffect 进行清除
+      cleanupEffect(this);
+      // 设置状态为 false，以防多次调用时多次清空
+      this.active = false;
+    }
+  }
+}
+
+/**
+ * 清除 effect
+ * @param effect effect
+ */
+function cleanupEffect(effect) {
+  // 清除 dep 中的 effect
+  effect.deps.forEach((dep: any) => {
+    // Set 删除 effect
+    dep.delete(effect);
+  });
 }
 
 // 当前 effect
@@ -36,7 +62,11 @@ export function effect(fn, options: any = {}) {
   _effect.run();
 
   // 以当前的实例作为 this 的指向
-  return _effect.run.bind(_effect);
+  const runner: any = _effect.run.bind(_effect);
+  // 将 effect 实例挂载到 runner
+  runner.effect = _effect;
+
+  return runner;
 }
 
 // 保存所有 target 的 Map
@@ -69,8 +99,13 @@ export function track(target, key) {
     depsMap.set(key, dep);
   }
 
+  // 没有 activeEffect 的话，直接 return，不执行之后操作
+  if (!activeEffect) return;
+
   // 将 activeEffect 添加到 dep
   dep.add(activeEffect);
+  // 将 activeEffect 对应的所有 dep 收集到 deps
+  activeEffect.deps.push(dep);
 }
 
 /**
@@ -96,4 +131,13 @@ export function trigger(target, key) {
       effect.run();
     }
   }
+}
+
+/**
+ * 调用此方法后，停止执行传入的 runner 对应的 effect
+ * @param runner effect 返回的 runner
+ */
+export function stop(runner) {
+  // 调用 runner 上 effect 的 stop 方法
+  runner.effect.stop();
 }

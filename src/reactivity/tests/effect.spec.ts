@@ -1,5 +1,5 @@
 import { reactive } from "../reactive";
-import { effect } from "../effect";
+import { effect, stop } from "../effect";
 
 describe("effect", () => {
   it("happy path", () => {
@@ -57,5 +57,25 @@ describe("effect", () => {
     // 如果执行 runner 时，才会再次执行 fn
     run();
     expect(count).toBe(11);
+  });
+  it("stop", () => {
+    let userReactive = reactive({ age: 1 });
+    let userAge;
+
+    const runner = effect(() => {
+      userAge = userReactive.age;
+    });
+
+    userReactive.age = 2;
+    expect(userAge).toBe(2);
+
+    // 调用 stop 后，停止更新
+    stop(runner);
+    userReactive.age = 3;
+    expect(userAge).toBe(2);
+
+    // 调用 runner 后，继续更新
+    runner();
+    expect(userAge).toBe(3);
   });
 });
