@@ -28,6 +28,10 @@ function createGetter(isReadonly = false) {
       // 故返回 true
       return !isReadonly;
     }
+    // key 为 .IS_READONLY 时，说明此为 readonly
+    else if (key === ReactiveFlags.IS_READONLY) {
+      return isReadonly;
+    }
 
     // 非只读的情况
     if (!isReadonly) {

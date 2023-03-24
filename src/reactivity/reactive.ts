@@ -3,6 +3,8 @@ import { mutableHandlers, readonlyHandles } from "./baseHandles";
 export const enum ReactiveFlags {
   // 是否是 reactive
   IS_REACTIVE = "__v_isReactive",
+  // 是否是 readonly
+  IS_READONLY = "__v_isReadonly",
 }
 
 /**
@@ -41,4 +43,14 @@ function createActiveObject(raw, baseHandles) {
 export function isReactive(value) {
   // value 为普通对象时，此值为 undefined，故转为布尔类型
   return !!value[ReactiveFlags.IS_REACTIVE];
+}
+
+/**
+ * 检测是否是 readonly
+ * @param value 检测对象
+ * @returns {boolean} 是否是 readonly: true/false
+ */
+export function isReadonly(value) {
+  // value 为普通对象时，此值为 undefined，故转为布尔类型
+  return !!value[ReactiveFlags.IS_READONLY];
 }
