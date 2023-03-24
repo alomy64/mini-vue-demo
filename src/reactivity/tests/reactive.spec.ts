@@ -1,4 +1,4 @@
-import { reactive } from "../reactive";
+import { reactive, isReactive } from "../reactive";
 
 describe("reactive", () => {
   it("get", () => {
@@ -7,5 +7,8 @@ describe("reactive", () => {
 
     expect(user).not.toBe(userReactive);
     expect(userReactive.age).toBe(1);
+
+    expect(isReactive(userReactive)).toBe(true);
+    expect(isReactive(user)).toBe(false);
   });
 });

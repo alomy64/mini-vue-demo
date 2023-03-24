@@ -1,4 +1,5 @@
 import { track, trigger } from "./effect";
+import { ReactiveFlags } from "./reactive";
 
 // 创建 get，初始化时调用一次即可
 const get = createGetter();
@@ -21,6 +22,12 @@ function createGetter(isReadonly = false) {
    */
   return function get(target, key) {
     const res = Reflect.get(target, key);
+
+    // key 为 .IS_REACTIVE 时，说明此为 reactive
+    if (key === ReactiveFlags.IS_REACTIVE) {
+      // 故返回 true
+      return !isReadonly;
+    }
 
     // 非只读的情况
     if (!isReadonly) {
