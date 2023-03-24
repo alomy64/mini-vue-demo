@@ -1,4 +1,4 @@
-import { track, trigger } from "./effect";
+import { mutableHandlers, readonlyHandles } from "./baseHandles";
 
 /**
  * 对传入对象进行代理
@@ -6,31 +6,24 @@ import { track, trigger } from "./effect";
  * @returns Proxy 对象
  */
 export function reactive(raw) {
-  return new Proxy(raw, {
-    /**
-     * 获取属性对应的值
-     * @param target 目标对象
-     * @param key 要获取的属性
-     * @returns Reflect 对象获取的属性对应的值
-     */
-    get(target, key) {
-      const res = Reflect.get(target, key);
+  return createActiveObject(raw, mutableHandlers);
+}
 
-      track(target, key);
-      return res;
-    },
-    /**
-     * 设置属性值
-     * @param target 目标对象
-     * @param key 要设置的属性
-     * @param value 要设置的值
-     * @returns  Reflect 对象设置后返回的值 true/false
-     */
-    set(target, key, value) {
-      const res = Reflect.set(target, key, value);
+/**
+ * 对传入对象进行代理，且 只读
+ * @param raw 普通对象
+ * @returns 只读的 Proxy 对象
+ */
+export function readonly(raw) {
+  return createActiveObject(raw, readonlyHandles);
+}
 
-      trigger(target, key);
-      return res;
-    },
-  });
+/**
+ * 对传入对象进行代理
+ * @param raw 普通对象
+ * @param baseHandles 包含 get 和 set
+ * @returns 只读/非只读 的 Proxy 对象
+ */
+function createActiveObject(raw, baseHandles) {
+  return new Proxy(raw, baseHandles);
 }
