@@ -62,6 +62,7 @@ function cleanupEffect(effect) {
     // Set 删除 effect
     dep.delete(effect);
   });
+  effect.deps.length = 0; // 清空 effect.deps
 }
 
 /**
