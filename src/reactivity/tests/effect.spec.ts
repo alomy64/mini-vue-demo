@@ -1,4 +1,4 @@
-import { reactive } from "../reactive";
+import { isReactive, reactive } from "../reactive";
 import { effect, stop } from "../effect";
 
 describe("effect", () => {
@@ -17,6 +17,7 @@ describe("effect", () => {
     userReactive.age++;
     expect(userAge).toBe(3);
   });
+
   it("调用 effect 返回 runner", () => {
     let count = 10;
     const runner = effect(() => {
@@ -31,6 +32,7 @@ describe("effect", () => {
     expect(count).toBe(12);
     expect(r).toBe("Hello");
   });
+
   it("scheduler", () => {
     let count;
     let run;
@@ -58,6 +60,7 @@ describe("effect", () => {
     run();
     expect(count).toBe(11);
   });
+
   it("stop", () => {
     let userReactive = reactive({ age: 1 });
     let userAge;
@@ -79,6 +82,7 @@ describe("effect", () => {
     runner();
     expect(userAge).toBe(3);
   });
+
   it("onStop", () => {
     let userReactive = reactive({ age: 1 });
     let userAge;
@@ -95,4 +99,17 @@ describe("effect", () => {
     stop(runner);
     expect(onStop).toBeCalledTimes(1);
   });
+
+  // 嵌套响应式
+  it('nested reactives', () => {
+    let origin = {
+      obj: { foo: 1 },
+      array: [{ bar: 2 }],
+    };
+    const observed = reactive(origin)
+    origin.obj.foo = 10;
+    expect(isReactive(observed.obj)).toBe(true)
+    expect(isReactive(observed.array)).toBe(true)
+    expect(isReactive(observed.array[0])).toBe(true)
+  })
 });
