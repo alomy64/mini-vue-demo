@@ -71,7 +71,8 @@ describe("effect", () => {
 
     // 调用 stop 后，停止更新
     stop(runner);
-    userReactive.age = 3;
+    // userReactive.age = 3; // 只会触发 set
+    userReactive.age++; // 不仅会触发 set, 还会触发 get, get 时会重新收集依赖
     expect(userAge).toBe(2);
 
     // 调用 runner 后，继续更新

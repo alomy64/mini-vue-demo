@@ -1,5 +1,8 @@
 import { extend } from "../shared/index";
 
+let activeEffect; // 当前 effect
+let shouldTrack = false; // 是否应该收集依赖
+
 class EffectReactive {
   private _fn: any;
   // 收集此 effect 对应的所有 dep
@@ -20,10 +23,17 @@ class EffectReactive {
 
   // fn 执行方法
   run() {
-    // activeEffect 绑定
-    activeEffect = this;
-    // 返回并执行 fn
-    return this._fn();
+    // stop 时直接调用当前的 fn 并返回
+    if (!this.active) {
+      return this._fn();
+    }
+
+    shouldTrack = true; // 应该收集依赖
+    activeEffect = this; // effect 绑定
+    const result = this._fn(); // 执行 fn 并返回
+    shouldTrack = false; // 重置, 不应该收集依赖
+
+    return result;
   }
 
   stop() {
@@ -53,9 +63,6 @@ function cleanupEffect(effect) {
     dep.delete(effect);
   });
 }
-
-// 当前 effect
-let activeEffect;
 
 /**
  * effect
@@ -90,6 +97,8 @@ const targetMap = new Map();
  * @param key 要进行依赖收集的属性
  */
 export function track(target, key) {
+  if (!isTracking()) return; // 不进行依赖收集
+
   // 目标 target 所对应的 Map
   let depsMap = targetMap.get(target);
 
@@ -111,13 +120,18 @@ export function track(target, key) {
     depsMap.set(key, dep);
   }
 
-  // 没有 activeEffect 的话，直接 return，不执行之后操作
-  if (!activeEffect) return;
+  if (dep.has(activeEffect)) return; // 判断 dep 之前有没有添加过, 有的话直接返回
 
-  // 将 activeEffect 添加到 dep
-  dep.add(activeEffect);
-  // 将 activeEffect 对应的所有 dep 收集到 deps
-  activeEffect.deps.push(dep);
+  dep.add(activeEffect);  // 将 activeEffect 添加到 dep
+  activeEffect.deps.push(dep); // 将 activeEffect 对应的所有 dep 收集到 deps
+}
+
+/**
+ * 是否应该收集依赖
+ * @returns {boolean} 是否应该收集依赖
+ */
+function isTracking() {
+  return shouldTrack && activeEffect !== undefined;
 }
 
 /**
